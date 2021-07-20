@@ -44,7 +44,7 @@
 #include "libfab_internal.h"
 #include "net/net_internal.h"   /* m0_net__buffer_invariant() */
 
-static char     *providers[] = { "verbs", "tcp", "sockets" };
+static char     *providers[] = { /*"verbs",*/ "tcp", "sockets" };
 static char     *protf[]  = { "unix", "inet", "inet6" };
 static char     *socktype[] = { "stream", "dgram" };
 static uint64_t  mr_key_idx = 0;
