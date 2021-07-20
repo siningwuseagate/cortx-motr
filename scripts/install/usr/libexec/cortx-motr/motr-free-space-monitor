@@ -83,6 +83,7 @@ def execute_command(command):
         console_output = json.loads(process.stdout.decode('utf-8'))
         capacity_info = console_output.get('filesystem',{}).get('stats',{})
         if not capacity_info:
+            time.sleep(iem_alert_check_interval)
             continue
         return capacity_info
 
