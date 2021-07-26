@@ -68,7 +68,7 @@ enum m0_fab__libfab_params {
 	/** Max segment size for bulk buffers for Verbs */
 	FAB_VERBS_MAX_BULK_SEG_SIZE    = 4096, //1048576,
 	/** Max number of active work requests for Verbs */
-	FAB_VERBS_MAX_QUEUE_SIZE       = 224,
+	FAB_VERBS_MAX_QUEUE_SIZE       = 256, //224,
 
 	/** Max number of IOV in read/write command for TCP/Socket provider
 	 * (max number of segments) */
