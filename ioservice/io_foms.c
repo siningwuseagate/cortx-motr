@@ -2080,6 +2080,8 @@ static int stob_io_create(struct m0_fom *fom)
 									   	   unit_size,
 									       rwfop->crw_cksum_size);
 		}
+		M0_LOG(M0_DEBUG, "YJC %"PRIu64 "rep_nob = %"PRIu64 " unit_size =%"PRIu64,
+				  rwfop->crw_dummy_id, rw_replyfop->rwr_di_data_cksum.b_nob, unit_size);
 
 		// Its expected to receive atleast on unit start in a fop
 		M0_ASSERT(rw_replyfop->rwr_di_data_cksum.b_nob > 0);

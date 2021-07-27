@@ -502,6 +502,7 @@ M0_INTERNAL int m0_rpc_packet_decode_using_cursor(struct m0_rpc_packet *p,
 		m0_rpc_packet_add_item(p, item);
 		m0_rpc_item_put(item);
 		m0_rpc_machine_unlock(p->rp_rmachine);
+		M0_LOG(M0_DEBUG, "YJC: fop = %p item = %p", m0_rpc_item_to_fop(item), item);
 		item = NULL;
 	}
 	rc = packet_footer_encdec(&pof, cursor, M0_XCODE_DECODE);

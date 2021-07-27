@@ -788,12 +788,12 @@ static void net_buf_received(struct m0_net_buffer    *nb,
 	struct m0_rpc_packet   p;
 	int                    rc;
 
-	M0_ENTRY("net_buf: %p, offset: %llu, length: %llu,"
-		 "ep_addr: %s", nb, (unsigned long long)offset,
-		 (unsigned long long)length, (char *)from_ep->nep_addr);
-
 	machine = tm_to_rpc_machine(nb->nb_tm);
 	m0_rpc_packet_init(&p, machine);
+	M0_ENTRY("net_buf: %p, offset: %llu, length: %llu,"
+		 "ep_addr: %s rp_size = %"PRIu64, nb, (unsigned long long)offset,
+		 (unsigned long long)length, (char *)from_ep->nep_addr, p.rp_size);
+
 	rc = m0_rpc_packet_decode(&p, &nb->nb_buffer, offset, length);
 	if (rc != 0)
 		M0_LOG(M0_ERROR, "Packet decode error: %i.", rc);

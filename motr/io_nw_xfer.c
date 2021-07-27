@@ -1013,8 +1013,13 @@ static int target_ioreq_iofops_prepare(struct target_ioreq *ti,
 				rw_fop->crw_di_data_cksum.b_addr = NULL;
 				rw_fop->crw_di_data_cksum.b_nob = 0;
 				rw_fop->crw_is_data_fop = 2;
+				if(!read_in_write)
+					M0_ASSERT(ioo->ioo_attr.ov_vec.v_count[0]);
 			}		
 			rw_fop->crw_cksum_size = read_in_write ? 0 : ioo->ioo_attr.ov_vec.v_count[0];
+			M0_LOG(M0_DEBUG, "YJC %"PRIu64 ": read_in_write = %s crw_cksum_size = %"PRIu64 " v_count[0] =%"PRIu64,
+					   rw_fop->crw_dummy_id, read_in_write ? "true" : "false", rw_fop->crw_cksum_size,
+					   ioo->ioo_attr.ov_vec.v_count[0]);
 		}
 		else {
 			rw_fop->crw_is_data_fop = 0;
