@@ -2431,14 +2431,15 @@ static void m0_io_fom_cob_rw_fini(struct m0_fom *fom)
 	if (fom_obj->fcrw_stio != NULL)
 		stob_io_destroy(fom);
 
+#if 0
 	if(m0_is_read_fop(fop))
 	{
 		struct m0_fop_cob_rw_reply *rw_replyfop = io_rw_rep_get(fom->fo_rep_fop);
 		
-		if(rw_replyfop->rwr_di_data_cksum.b_addr)
+		if(0 && rw_replyfop->rwr_di_data_cksum.b_addr)
 			m0_buf_free(&rw_replyfop->rwr_di_data_cksum);
 	}
-	
+#endif	
 	m0_fom_fini(fom);
 	m0_free(fom_obj);
 }

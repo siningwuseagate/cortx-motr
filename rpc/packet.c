@@ -515,7 +515,7 @@ M0_INTERNAL int m0_rpc_packet_decode_using_cursor(struct m0_rpc_packet *p,
 
 	/* assert the decoded packet has the same number of items and size */
 	M0_ASSERT(p->rp_ow.poh_nr_items == poh.poh_nr_items);
-	//M0_ASSERT(p->rp_size == rpc_t.ot_size);
+	M0_ASSERT(p->rp_size == rpc_t.ot_size);
 
 	M0_ASSERT_EX(m0_rpc_packet_invariant(p));
 
