@@ -941,7 +941,7 @@ be_emap_vsize(const void* d)
 	return sizeof(struct m0_be_emap_rec) +
 		((struct m0_be_emap_rec *)d)->er_cksum_nob;
 }
-
+#define CKSUM_MAX 2048
 static int
 emap_it_pack(struct m0_be_emap_cursor *it,
 		void (*btree_func)(struct m0_be_btree *btree,
@@ -965,6 +965,7 @@ emap_it_pack(struct m0_be_emap_cursor *it,
 	rec->er_value  = ext->ee_val;
 	rec->er_cksum_nob = ext->ee_cksum_buf.b_nob;
 	rec->er_unit_size = it->ec_unit_size;
+	M0_ASSERT(rec->er_cksum_nob <= CKSUM_MAX);
 
 	/* Layout/format of emap-record (if checksum is present) which gets
 	 * written:
