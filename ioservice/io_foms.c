@@ -2164,7 +2164,7 @@ static int stob_io_create(struct m0_fom *fom)
 	 * checksum-nob for all stobs 
 	 */
 	M0_ASSERT( m0_is_read_fop(fom->fo_fop) ? 
-				(curr_cksum_nob == rw_replyfop->rwr_di_data_cksum.b_nob) : true);
+				(curr_cksum_nob == rw_replyfop->rwr_di_data_cksum.b_nob) : (curr_cksum_nob == rwfop->crw_di_data_cksum.b_nob));
 
 	if (rc != 0 && i > 0) {
 		while (--i >= 0) {

@@ -129,10 +129,10 @@ M0_INTERNAL struct m0_file *m0_client_fop_to_file(struct m0_fop *fop)
  *      extents, get corresponding GOB offset and use GOB Offset and GOB 
  *      Extents (ioo_ext) to locate the checksum add and copy one checksum
  *      to the application checksum buffer.
- * @param rep_ivec m0_indexvec representing the extents spanned by IO.
- * @param ti       target_ioreq structure for this reply's taregt.
- * @param ioo      Object's context for client's internal workings.
- * @param buf      buffer contaiing attributes received from server.
+ * @param rep_ivec [in] : m0_indexvec representing the extents spanned by IO.
+ * @param ti       [in] : target_ioreq structure for this reply's taregt.
+ * @param ioo      [out]: Object's context for client's internal workings.
+ * @param buf      [in] : buffer contaiing attributes received from server.
  */
 static void application_attribute_copy(struct m0_indexvec *rep_ivec,
 				       struct target_ioreq *ti,
@@ -152,7 +152,7 @@ static void application_attribute_copy(struct m0_indexvec *rep_ivec,
 	void *dst = ioo->ioo_attr.ov_buf[0];
 	void *src = buf->b_addr;
 
-	if(!buf->b_nob)
+	if(!buf->b_nob || (ioo->ioo_attr.ov_vec.v_nr == 0) )
 	{
 		/* Return as no checksum is present */
 		return;
