@@ -185,7 +185,6 @@ struct init_fini_call subsystem[] = {
 	{ &m0_fom_generic_init, &m0_fom_generic_fini, "fom-generic" },
 	/* addb2-net must be after rpc, because it initialises a fop type. */
 	{ &m0_addb2_net_module_init, &m0_addb2_net_module_fini, "addb2-net" },
-	{ &m0_mem_xprt_init,    &m0_mem_xprt_fini,    "bulk/mem" },
 #ifndef __KERNEL__
 	{ &m0_net_sock_mod_init, &m0_net_sock_mod_fini, "net/sock" },
 #endif
