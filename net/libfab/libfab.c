@@ -167,6 +167,7 @@ static int libfab_waitfd_bind(struct fid* fid, struct m0_fab__tm *tm,
 			      void *ctx);
 static inline struct m0_fab__active_ep *libfab_aep_get(struct m0_fab__ep *ep);
 static int libfab_bulk_op(struct m0_fab__active_ep *ep, struct m0_fab__buf *fb);
+static int libfab_ping_op(struct m0_fab__active_ep *ep, struct m0_fab__buf *fb);
 static inline bool libfab_is_verbs(struct m0_fab__tm *tm);
 static int libfab_bulklist_add(struct m0_fab__tm *tm, struct m0_fab__buf *fb,
 				struct m0_fab__active_ep *aep);
@@ -2474,7 +2475,6 @@ static void libfab_bulk_buf_process(struct m0_fab__tm *tm)
 					FAB_TCP_SOCK_MAX_QUEUE_SIZE;
 
 	m0_tl_for(fab_bulk, &tm->ftm_bulk, op) {
-		/* Keeping 64 entries on CQ for rpc messages */
 		if (op->fbl_aep->aep_bulk_cnt < total)
 			available = total - op->fbl_aep->aep_bulk_cnt;
 		else
@@ -2483,12 +2483,41 @@ static void libfab_bulk_buf_process(struct m0_fab__tm *tm)
 		   libfabric queue and the endpoint is in connected state. */
 		if (op->fbl_buf->fb_wr_cnt <= available &&
 		    op->fbl_aep->aep_tx_state == FAB_CONNECTED) {
-			libfab_bulk_op(op->fbl_aep, op->fbl_buf);
+			if (op->fbl_buf->fb_nb->nb_qtype == M0_NET_QT_MSG_SEND)
+				libfab_ping_op(op->fbl_aep, op->fbl_buf);
+			else
+				libfab_bulk_op(op->fbl_aep, op->fbl_buf);
 			fab_bulk_tlist_del(op);
 			op->fbl_buf->fb_bulk_op = NULL;
 			m0_free(op);
 		}
 	} m0_tl_endfor;
+}
+
+/** 
+ * This function will call the ping transfer operation (send/recv) on the
+ * net-buffer.
+ */
+static int libfab_ping_op(struct m0_fab__active_ep *aep, struct m0_fab__buf *fb)
+{
+	struct fi_msg op_msg;
+	struct iovec  iv;
+	int           ret;
+
+	iv.iov_base = fb->fb_nb->nb_buffer.ov_buf[0];
+	iv.iov_len = fb->fb_nb->nb_buffer.ov_vec.v_count[0];
+	op_msg.msg_iov = &iv;
+	op_msg.desc = fb->fb_mr.bm_desc;
+	op_msg.iov_count = 1;
+	op_msg.addr = 0;
+	op_msg.context = &fb->fb_token;
+	op_msg.data = 0;
+	fb->fb_wr_cnt = 1;
+	ret = fi_sendmsg(aep->aep_txep, &op_msg, FI_COMPLETION);
+	if (ret == FI_SUCCESS)
+		aep->aep_bulk_cnt += fb->fb_wr_cnt;
+
+	return ret;
 }
 
 /** 
@@ -2962,10 +2991,10 @@ static int libfab_buf_add(struct m0_net_buffer *nb)
 	struct m0_fab__active_ep *aep;
 	struct iovec              iv;
 	struct m0_fab__ep_name    epname;
-	struct fi_msg             op_msg;
-	uint32_t                  q_size = libfab_is_verbs(ma) ?
-					  FAB_VERBS_MAX_QUEUE_SIZE :
-					  FAB_TCP_SOCK_MAX_QUEUE_SIZE;
+	// struct fi_msg             op_msg;
+	// uint32_t                  q_size = libfab_is_verbs(ma) ?
+	// 				  FAB_VERBS_MAX_QUEUE_SIZE :
+	// 				  FAB_TCP_SOCK_MAX_QUEUE_SIZE;
 	int                       ret = 0;
 
 	M0_ENTRY("fb=%p nb=%p q=%d l=%"PRIu64, fbp, nb, nb->nb_qtype,
@@ -3002,21 +3031,27 @@ static int libfab_buf_add(struct m0_net_buffer *nb)
 		
 		if (aep->aep_tx_state != FAB_CONNECTED)
 			ret = libfab_conn_init(ep, ma, fbp);
-		else if (aep->aep_bulk_cnt >= q_size)
-			ret = -EAGAIN;
+		// else if (aep->aep_bulk_cnt >= q_size) {
+			// ret = -EAGAIN;
+			// fbp->fb_wr_cnt = 1;
+			// ret = libfab_bulklist_add(ma, fbp, aep);
+			// libfab_bulk_buf_process(ma);
 		else {
-			iv.iov_base = nb->nb_buffer.ov_buf[0];
-			iv.iov_len = nb->nb_buffer.ov_vec.v_count[0];
-			op_msg.msg_iov = &iv;
-			op_msg.desc = fbp->fb_mr.bm_desc;
-			op_msg.iov_count = 1;
-			op_msg.addr = 0;
-			op_msg.context = &fbp->fb_token;
-			op_msg.data = 0;
+			// iv.iov_base = nb->nb_buffer.ov_buf[0];
+			// iv.iov_len = nb->nb_buffer.ov_vec.v_count[0];
+			// op_msg.msg_iov = &iv;
+			// op_msg.desc = fbp->fb_mr.bm_desc;
+			// op_msg.iov_count = 1;
+			// op_msg.addr = 0;
+			// op_msg.context = &fbp->fb_token;
+			// op_msg.data = 0;
+			// fbp->fb_wr_cnt = 1;
+			// ret = fi_sendmsg(aep->aep_txep, &op_msg, FI_COMPLETION);
+			// if (ret == FI_SUCCESS)
+			// 	aep->aep_bulk_cnt += fbp->fb_wr_cnt;
 			fbp->fb_wr_cnt = 1;
-			ret = fi_sendmsg(aep->aep_txep, &op_msg, FI_COMPLETION);
-			if (ret == FI_SUCCESS)
-				aep->aep_bulk_cnt += fbp->fb_wr_cnt;
+			ret = libfab_bulklist_add(ma, fbp, aep);
+			libfab_bulk_buf_process(ma);
 		}
 		break;
 	}
