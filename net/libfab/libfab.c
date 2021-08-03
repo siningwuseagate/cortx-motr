@@ -1633,6 +1633,8 @@ static void libfab_buf_fini(struct m0_fab__buf *buf)
 	}
 	buf->fb_status = 0;
 	buf->fb_length = 0;
+	if (buf->fb_token != 0)
+		M0_LOG(M0_DEBUG,"Reset token =%d ", buf->fb_token);
 	buf->fb_token = 0;
 	buf->fb_state = FAB_BUF_REGISTERED;
 
@@ -1728,8 +1730,8 @@ static void libfab_buf_done(struct m0_fab__buf *buf, int rc)
 	uint32_t             *ptr;
 	int                   ret;
 
-	M0_ENTRY("fb=%p nb=%p q=%d len=%d rc=%d", buf, nb, nb->nb_qtype,
-		 (int)buf->fb_length, rc);
+	M0_ENTRY("fb=%p nb=%p q=%d len=%d tok=%d rc=%d", buf, nb, nb->nb_qtype,
+		 (int)buf->fb_length, buf->fb_token, rc);
 	M0_PRE(libfab_tm_is_locked(ma));
 	/*
 	 * Multiple libfab_buf_done() calls on the same buffer are possible if
