@@ -64,9 +64,9 @@ enum m0_fab__libfab_params {
 	/** Key used for memory registration. */
 	FAB_MR_KEY                     = 0xABCD,
 	/** Max number of IOV in read/write command for Verbs */
-	FAB_VERBS_IOV_MAX              = 1,
+	FAB_VERBS_IOV_MAX              = 16, //1,
 	/** Max segment size for bulk buffers for Verbs */
-	FAB_VERBS_MAX_BULK_SEG_SIZE    = 1048576,
+	FAB_VERBS_MAX_BULK_SEG_SIZE    = 16348, //1048576,
 	/** Max number of active work requests for Verbs */
 	FAB_VERBS_MAX_QUEUE_SIZE       = 224,
 
@@ -77,7 +77,7 @@ enum m0_fab__libfab_params {
 	 * (4k but can be increased) */
 	FAB_TCP_SOCK_MAX_BULK_SEG_SIZE = 4096,//1048576,//4096,
 	/** Max number of active work requests for TCP/Socket provider */
-	FAB_TCP_SOCK_MAX_QUEUE_SIZE    = 256,//1024,
+	FAB_TCP_SOCK_MAX_QUEUE_SIZE    = 1024,
 
 	/** Max segment size for rpc buffer ( 1MB but can be changed ) */
 	FAB_MAX_RPC_SEG_SIZE           = (1 << 20),
